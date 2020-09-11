@@ -20,13 +20,13 @@
  */
 
 /**
- * This class contains information about the current battery status.
+ * This class contains information about the current battery notification.
  * @constructor
  */
 var cordova = require('cordova');
 var exec = require('cordova/exec');
 
-var Battery = function () {
+var BatteryNotification = function () {
     this._level = null;
     this._isPlugged = null;
     // Create new event handlers on the window (returns a channel instance)
@@ -34,17 +34,17 @@ var Battery = function () {
         batterystatus: cordova.addWindowEventHandler('batterystatus')
     };
     for (var key in this.channels) {
-        this.channels[key].onHasSubscribersChange = Battery.onHasSubscribersChange;
+        this.channels[key].onHasSubscribersChange = BatteryNotification.onHasSubscribersChange;
     }
 };
 
 function handlers() {
     return (
-        battery.channels.batterystatus.numHandlers
+        batterynotification.channels.batterystatus.numHandlers
     );
 }
 
-Battery.prototype._ensureBoolean = function (callback) {
+BatteryNotification.prototype._ensureBoolean = function (callback) {
     return function (result) {
         callback(!!result);
     }
@@ -59,34 +59,34 @@ Battery.prototype._ensureBoolean = function (callback) {
      * @param {Function} errorCallback -  The callback which will be called when the operation encounters an error.
      *  This callback function is passed a single string parameter containing the error message.
      */
-Battery.prototype.isCharging = function (successCallback, errorCallback) {
-    return exec(battery._ensureBoolean(successCallback),
+BatteryNotification.prototype.isCharging = function (successCallback, errorCallback) {
+    return exec(BatteryNotification._ensureBoolean(successCallback),
         errorCallback,
-        'Battery',
+        'BatteryNotification',
         'isCharging',
         []);
 };
 
-Battery.prototype.getDataBatteryInfo = function (successCallback, errorCallback) {
+BatteryNotification.prototype.getDataBatteryInfo = function (successCallback, errorCallback) {
     return exec(successCallback,
         errorCallback,
-        'Battery',
+        'BatteryNotification',
         'getDataBatteryInfo',
         []);
 };
 
-Battery.prototype.startService = function (successCallback, errorCallback) {
+BatteryNotification.prototype.startService = function (successCallback, errorCallback) {
     return exec(successCallback,
         errorCallback,
-        'Battery',
+        'BatteryNotification',
         'startService',
         []);
 };
 
-Battery.prototype.stopService = function (successCallback, errorCallback) {
+BatteryNotification.prototype.stopService = function (successCallback, errorCallback) {
     return exec(successCallback,
         errorCallback,
-        'Battery',
+        'BatteryNotification',
         'stopService',
         []);
 };
@@ -96,12 +96,12 @@ Battery.prototype.stopService = function (successCallback, errorCallback) {
  * Keep track of how many handlers we have so we can start and stop the native battery listener
  * appropriately.
  */
-Battery.onHasSubscribersChange = function () {
+BatteryNotification.onHasSubscribersChange = function () {
     // If we just registered the first handler, make sure native listener is started.
     if (this.numHandlers === 1 && handlers() === 1) {
-        exec(battery._status, battery._error, 'Battery', 'start', []);
+        exec(batterynotification._status, batterynotification._error, 'BatteryNotification', 'start', []);
     } else if (handlers() === 0) {
-        exec(null, null, 'Battery', 'stop', []);
+        exec(null, null, 'BatteryNotification', 'stop', []);
     }
 };
 
@@ -110,29 +110,29 @@ Battery.onHasSubscribersChange = function () {
  *
  * @param {Object} info            keys: level, isPlugged
  */
-Battery.prototype._status = function (info) {
+BatteryNotification.prototype._status = function (info) {
     if (info) {
-        if (battery._level !== info.level || battery._isPlugged !== info.isPlugged) {
-            if (info.level === null && battery._level !== null) {
+        if (batterynotification._level !== info.level || batterynotification._isPlugged !== info.isPlugged) {
+            if (info.level === null && batterynotification._level !== null) {
                 return; // special case where callback is called because we stopped listening to the native side.
             }
 
             // Something changed. Fire batterystatus event
             cordova.fireWindowEvent('batterystatus', info);
             
-            battery._level = info.level;
-            battery._isPlugged = info.isPlugged;
+            batterynotification._level = info.level;
+            batterynotification._isPlugged = info.isPlugged;
         }
     }
 };
 
 /**
- * Error callback for battery start
+ * Error callback for battery notification start
  */
-Battery.prototype._error = function (e) {
+BatteryNotification.prototype._error = function (e) {
     console.log('Error initializing Battery Notification: ' + e);
 };
 
-var battery = new Battery();
+var batterynotification = new BatteryNotification();
 
-module.exports = battery;
+module.exports = batterynotification;
