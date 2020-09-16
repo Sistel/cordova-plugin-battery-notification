@@ -31,7 +31,7 @@ var BatteryNotification = function () {
     this._isPlugged = null;
     // Create new event handlers on the window (returns a channel instance)
     this.channels = {
-        batterystatus: cordova.addWindowEventHandler('batterystatus')
+        batterynotification: cordova.addWindowEventHandler('batterynotification')
     };
     for (var key in this.channels) {
         this.channels[key].onHasSubscribersChange = BatteryNotification.onHasSubscribersChange;
@@ -40,7 +40,7 @@ var BatteryNotification = function () {
 
 function handlers() {
     return (
-        batterynotification.channels.batterystatus.numHandlers
+        batterynotification.channels.batterynotification.numHandlers
     );
 }
 
@@ -117,8 +117,8 @@ BatteryNotification.prototype._status = function (info) {
                 return; // special case where callback is called because we stopped listening to the native side.
             }
 
-            // Something changed. Fire batterystatus event
-            cordova.fireWindowEvent('batterystatus', info);
+            // Something changed. Fire batterynotification event
+            cordova.fireWindowEvent('batterynotification', info);
 
             batterynotification._level = info.level;
             batterynotification._isPlugged = info.isPlugged;
