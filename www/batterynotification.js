@@ -60,7 +60,7 @@ BatteryNotification.prototype._ensureBoolean = function (callback) {
      *  This callback function is passed a single string parameter containing the error message.
      */
 BatteryNotification.prototype.isCharging = function (successCallback, errorCallback) {
-    return exec(BatteryNotification._ensureBoolean(successCallback),
+    return exec(batterynotification._ensureBoolean(successCallback),
         errorCallback,
         'BatteryNotification',
         'isCharging',
