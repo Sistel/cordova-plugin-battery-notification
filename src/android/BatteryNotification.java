@@ -34,13 +34,21 @@ import android.os.BatteryManager;
 
 import android.util.Log;
 
-import org.apache.cordova.batterynotification.BatteryNotificationService;
+import androidx.work.Data;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
+
+// import org.apache.cordova.batterynotification.BatteryNotificationService;
+
+import java.util.concurrent.TimeUnit;
 
 public class BatteryNotification extends CordovaPlugin {
 
     private int savedLevel = -1;
     private boolean savedIsPlugged = false;
-    private int minLevel = 20;
+    private int minLevel = 99;
+    private String notifMessage = "Wicharge test";
 
     private static final String LOG_TAG = "BatteryNotification";
 
@@ -51,7 +59,7 @@ public class BatteryNotification extends CordovaPlugin {
     /**
      * Constructor.
      */
-    public BatteryListener() {
+    public BatteryNotification() {
         this.receiver = null;
     }
 
@@ -67,9 +75,7 @@ public class BatteryNotification extends CordovaPlugin {
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) {
 
         if (action.equals("startService")) {
-            Intent mIntent = new Intent(webView.getContext());
-            mIntent.putExtra("minLevel", minLevel);
-            webView.getContext().startService(mIntent, BatteryNotificationService.class);
+            startService(args);
 
             // Don't return any result
             callbackContext.success();
@@ -77,14 +83,14 @@ public class BatteryNotification extends CordovaPlugin {
         }
 
         else if (action.equals("stopService")) {
-            Intent mIntent = new Intent(webView.getContext());
-            webView.getContext().stopService(mIntent, BatteryNotificationService.class);
-
+            // Intent mIntent = new Intent(webView.getContext(),
+            // BatteryNotificationService.class);
+            // webView.getContext().stopService(mIntent);
+            stopService();
             // Don't return any result
             callbackContext.success();
             return true;
         }
-
 
         else if (action.equals("start")) {
             // We need to listen to power events to update battery status
@@ -216,84 +222,45 @@ public class BatteryNotification extends CordovaPlugin {
         return info;
     }
 
-    private void sendNotification(JSONObject data) {
-        if (data != null) {
-            int level = -1;
-            boolean isPlugged = false;
-            try {
-                level = (int) data.get("level");
-                isPlugged = (boolean) data.get("isPlugged");
-            } catch (Exception e) {
-                LOG.e(LOG_TAG, "Error unregistering battery receiver: " + e.getMessage(), e);
-                return;
-            }
-
-            if (level != savedLevel || isPlugged != savedIsPlugged) {
-                savedLevel = level;
-                savedIsPlugged = isPlugged;
-
-                int KEY_NOTIFICATION_BATTERY = 8361;
-                String message = "Es una prueba";
-                LocalNotification localNotification = LocalNotification.getInstance();
-                JSONArray toasts = new JSONArray();
-                JSONObject toast = new JSONObject();
-                JSONObject meta = new JSONObject();
-                JSONObject trigger = new JSONObject();
-                JSONObject progressBar = new JSONObject();
-                try {
-                    meta.put("plugin", "codova-plugin-local-notification");
-                    meta.put("version", "0.9-beta.3");
-                    toast.put("meta", meta);
-
-                    trigger.put("type", "calendar");
-                    toast.put("trigger", trigger);
-
-                    progressBar.put("enabled", false);
-                    progressBar.put("indeterminate", false);
-                    progressBar.put("maxValue", 100);
-                    progressBar.put("value", 0);
-                    toast.put("progressBar", progressBar);
-
-                    toast.put("actions", new JSONArray());
-                    toast.put("attachments", new JSONArray());
-                    toast.put("autoClear", false);
-                    toast.put("clock", true);
-                    toast.put("defaults", 0);
-                    toast.put("groupSummary", false);
-                    toast.put("launch", true);
-                    toast.put("led", true);
-                    toast.put("lockscreen", true);
-                    toast.put("priority", 0);
-                    toast.put("silent", false);
-                    toast.put("smallIcon", "res://icon");
-                    toast.put("sound", true);
-                    toast.put("sticky", false);
-                    toast.put("title", "");
-                    toast.put("vibrate", true);
-                    toast.put("wakeup", true);
-
-                    toast.put("id", KEY_NOTIFICATION_BATTERY);
-                    toast.put("text", message);
-
-                    toasts.put(toast);
-                } catch (Exception e) {
-                    LOG.e(LOG_TAG, "Error unregistering battery receiver: " + e.getMessage(), e);
-                    return;
-                }
-                try {
-
-                    Log.d(LOG_TAG, "******* Enviar notificacion: check level: " + level + " *******");
-                    if (!isPlugged && level <= 84) {
-                        Log.d(LOG_TAG, "******* Enviar notificacion: OK *******");
-                        localNotification.schedule(toasts, this.batteryCallbackContext);
-                    } else {
-                        Log.d(LOG_TAG, "******* Enviar notificacion: NO se cumplen condiciones *******");
-                    }
-                } catch (Exception e) {
-                    LOG.e(LOG_TAG, "Error unregistering battery receiver: " + e.getMessage(), e);
-                }
-            }
+    private void startService(JSONArray args) {
+        // Service
+        try {
+            minLevel = args.getInt(0);
+            notifMessage= args.getString(1);
+        } catch (JSONException e) {
+            LOG.e(LOG_TAG, "Error in startService reading args: " + e.getMessage(), e);
         }
+
+        Intent mIntent = new Intent(webView.getContext(), BatteryNotificationService.class);
+        mIntent.putExtra("minLevel", minLevel);
+        mIntent.putExtra("message", notifMessage);
+        webView.getContext().startService(mIntent);
+
+        // WorkManager
+        WorkManager mWorkManager = WorkManager.getInstance(webView.getContext());
+
+        mWorkManager.cancelUniqueWork("check_battery");
+        Data data = new Data.Builder().putString("message", notifMessage).putInt("minLevel", minLevel).build();
+        PeriodicWorkRequest periodicSyncDataWork = new PeriodicWorkRequest.Builder(NotificationWorker.class, 15,
+                TimeUnit.MINUTES).setInputData(data).setInitialDelay(15, TimeUnit.SECONDS).build();
+        mWorkManager.enqueueUniquePeriodicWork("check_battery", ExistingPeriodicWorkPolicy.KEEP, // Existing Periodic
+                                                                                                 // Work policy
+                periodicSyncDataWork // work request
+        );
+        // Log.e(LOG_TAG, "startService: enqueueUniquePeriodicWork done");
     }
+
+    private void stopService() {
+        
+        // Service
+        Intent mIntent = new Intent(webView.getContext(), BatteryNotificationService.class);
+        webView.getContext().stopService(mIntent);
+
+        // WorkManager
+        WorkManager mWorkManager = WorkManager.getInstance(webView.getContext());
+        mWorkManager.cancelUniqueWork("check_battery");
+
+    }
+
 
 }

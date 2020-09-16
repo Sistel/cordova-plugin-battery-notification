@@ -75,12 +75,12 @@ BatteryNotification.prototype.getDataBatteryInfo = function (successCallback, er
         []);
 };
 
-BatteryNotification.prototype.startService = function (successCallback, errorCallback) {
+BatteryNotification.prototype.startService = function (minLevel, message, successCallback, errorCallback) {
     return exec(successCallback,
         errorCallback,
         'BatteryNotification',
         'startService',
-        []);
+        [minLevel, message]);
 };
 
 BatteryNotification.prototype.stopService = function (successCallback, errorCallback) {
@@ -119,7 +119,7 @@ BatteryNotification.prototype._status = function (info) {
 
             // Something changed. Fire batterystatus event
             cordova.fireWindowEvent('batterystatus', info);
-            
+
             batterynotification._level = info.level;
             batterynotification._isPlugged = info.isPlugged;
         }
