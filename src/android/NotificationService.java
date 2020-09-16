@@ -57,9 +57,9 @@ public class NotificationService {
             Log.e(LOG_TAG, "sendNotification isPlugged: " + isPlugged + "  level: " + level   +  "  minLevel: " + minLevel);
             int mNotificationId = 6213;
             Notification notification = getActiveNotification(mNotificationId);
-            if (!isPlugged && level <= minLevel && !isNotificationSent()) {
-                if (notification == null) {
-
+            if (!isPlugged && level <= minLevel) {
+                if (!isNotificationSent() && notification == null) {
+                    setNotificationSent(true);
                     NotificationManager manager = (NotificationManager) context
                             .getSystemService(Context.NOTIFICATION_SERVICE);
                     String channelId = "task_batt_channel";
@@ -83,11 +83,10 @@ public class NotificationService {
 
                     // It will display the notification in notification bar
                     manager.notify(mNotificationId, mBuilder.build());
-                    setNotificationSent(true);
                 }
 
             } else {
-                if (notification != null) {
+                if (level > minLevel && notification != null) {
                     NotificationManager manager = (NotificationManager) context
                             .getSystemService(Context.NOTIFICATION_SERVICE);
                     manager.cancel(mNotificationId);
@@ -172,7 +171,7 @@ public class NotificationService {
         return info;
     }
 
-    private void setNotificationSent(boolean value) {
+    public void setNotificationSent(boolean value) {
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putBoolean(NOTIFICATION_SENT_VALUE, value);
         editor.apply();

@@ -19,10 +19,15 @@
 package org.apache.cordova.batterynotification;
 
 import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.work.Data;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
+
+import org.json.JSONException;
 
 public class NotificationWorker extends Worker {
     private static final String WORK_RESULT = "work_result";
@@ -40,6 +45,7 @@ public class NotificationWorker extends Worker {
         String notifMessage = taskData.getString("message");
 //        Log.d(LOG_TAG, "doWork: sendNotification");
         NotificationService.getInstance(getApplicationContext()).sendNotification(minLevel, notifMessage);
+
         Data outputData = new Data.Builder().putString(WORK_RESULT, "Work done, notification sent").build();
         return Result.success(outputData);
     }

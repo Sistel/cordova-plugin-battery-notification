@@ -103,7 +103,7 @@ public class BatteryNotification extends CordovaPlugin {
                         updateBatteryInfo(intent);
                     }
                 };
-                webView.getContext().registerReceiver(this.receiver, intentFilter);
+                webView.getContext().getApplicationContext().registerReceiver(this.receiver, intentFilter);
             }
         }
 
@@ -112,6 +112,7 @@ public class BatteryNotification extends CordovaPlugin {
             this.sendUpdate(new JSONObject(), false); // release status callback in JS side
             this.batteryCallbackContext = null;
             callbackContext.success();
+            NotificationService.getInstance(webView.getContext().getApplicationContext()).setNotificationSent(false);
             return true;
         }
 
@@ -230,14 +231,17 @@ public class BatteryNotification extends CordovaPlugin {
         } catch (JSONException e) {
             LOG.e(LOG_TAG, "Error in startService reading args: " + e.getMessage(), e);
         }
+        Context context = webView.getContext().getApplicationContext();
 
-        Intent mIntent = new Intent(webView.getContext(), BatteryNotificationService.class);
+        NotificationService.getInstance(context).setNotificationSent(false);
+
+        Intent mIntent = new Intent(context, BatteryNotificationService.class);
         mIntent.putExtra("minLevel", minLevel);
         mIntent.putExtra("message", notifMessage);
-        webView.getContext().startService(mIntent);
+        context.startService(mIntent);
 
         // WorkManager
-        WorkManager mWorkManager = WorkManager.getInstance(webView.getContext());
+        WorkManager mWorkManager = WorkManager.getInstance(context);
 
         mWorkManager.cancelUniqueWork("check_battery");
         Data data = new Data.Builder().putString("message", notifMessage).putInt("minLevel", minLevel).build();
@@ -251,13 +255,16 @@ public class BatteryNotification extends CordovaPlugin {
     }
 
     private void stopService() {
+        Context context = webView.getContext().getApplicationContext();
+
+        NotificationService.getInstance(context).setNotificationSent(false);
         
         // Service
-        Intent mIntent = new Intent(webView.getContext(), BatteryNotificationService.class);
-        webView.getContext().stopService(mIntent);
+        Intent mIntent = new Intent(context, BatteryNotificationService.class);
+        context.stopService(mIntent);
 
         // WorkManager
-        WorkManager mWorkManager = WorkManager.getInstance(webView.getContext());
+        WorkManager mWorkManager = WorkManager.getInstance(context);
         mWorkManager.cancelUniqueWork("check_battery");
 
     }

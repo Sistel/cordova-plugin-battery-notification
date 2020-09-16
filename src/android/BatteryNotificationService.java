@@ -85,7 +85,7 @@ public class BatteryNotificationService extends Service {
                     }
                 }
             };
-            this.registerReceiver(this.receiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+            getApplicationContext().registerReceiver(this.receiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
         }
     }
 
