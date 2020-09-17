@@ -17,13 +17,13 @@
  under the License.
  */
 
-#import "CDVBattery.h"
+#import "CDVBatteryNotification.h"
 
-@interface CDVBattery (PrivateMethods)
+@interface CDVBatteryNotification (PrivateMethods)
 - (void)updateOnlineStatus;
 @end
 
-@implementation CDVBattery
+@implementation CDVBatteryNotification
 
 @synthesize state, level, callbackId, isPlugged;
 

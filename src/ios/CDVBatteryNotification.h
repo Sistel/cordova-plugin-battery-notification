@@ -20,7 +20,7 @@
 #import <Foundation/Foundation.h>
 #import <Cordova/CDVPlugin.h>
 
-@interface CDVBattery : CDVPlugin {
+@interface CDVBatteryNotification : CDVPlugin {
     UIDeviceBatteryState state;
     float level;
     bool isPlugged;
