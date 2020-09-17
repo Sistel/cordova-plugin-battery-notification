@@ -40,11 +40,11 @@
     <platform name="ios">
         <config-file target="config.xml" parent="/*">
             <feature name="BatteryNotification">
-                <param name="ios-package" value="CDVBattery" />
+                <param name="ios-package" value="CDVBatteryNotification" />
             </feature>
         </config-file>
-        <header-file src="src/ios/CDVBattery.h" />
-	    <source-file src="src/ios/CDVBattery.m" />
+        <header-file src="src/ios/CDVBatteryNotification.h" />
+	    <source-file src="src/ios/CDVBatteryNotification.m" />
     </platform>
     
 </plugin>
