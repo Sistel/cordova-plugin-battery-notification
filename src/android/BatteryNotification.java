@@ -105,6 +105,8 @@ public class BatteryNotification extends CordovaPlugin {
                 };
                 webView.getContext().getApplicationContext().registerReceiver(this.receiver, intentFilter);
             }
+            callbackContext.success();
+            return true;
         }
 
         else if (action.equals("stop")) {
@@ -227,7 +229,7 @@ public class BatteryNotification extends CordovaPlugin {
         // Service
         try {
             minLevel = args.getInt(0);
-            notifMessage= args.getString(1);
+            notifMessage = args.getString(1);
         } catch (JSONException e) {
             LOG.e(LOG_TAG, "Error in startService reading args: " + e.getMessage(), e);
         }
@@ -258,7 +260,7 @@ public class BatteryNotification extends CordovaPlugin {
         Context context = webView.getContext().getApplicationContext();
 
         NotificationService.getInstance(context).setNotificationSent(false);
-        
+
         // Service
         Intent mIntent = new Intent(context, BatteryNotificationService.class);
         context.stopService(mIntent);
@@ -268,6 +270,5 @@ public class BatteryNotification extends CordovaPlugin {
         mWorkManager.cancelUniqueWork("check_battery");
 
     }
-
 
 }
