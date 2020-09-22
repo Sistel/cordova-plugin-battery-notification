@@ -93,6 +93,10 @@ public class BatteryNotification extends CordovaPlugin {
         }
 
         else if (action.equals("start")) {
+            if (this.batteryCallbackContext != null) {
+                removeBatteryListener();
+            }
+            this.batteryCallbackContext = callbackContext;
             // We need to listen to power events to update battery status
             if (this.receiver == null) {
                 IntentFilter intentFilter = new IntentFilter();
