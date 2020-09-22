@@ -105,7 +105,11 @@ public class BatteryNotification extends CordovaPlugin {
                 };
                 webView.getContext().getApplicationContext().registerReceiver(this.receiver, intentFilter);
             }
-            callbackContext.success();
+            // Don't return any result now, since status results will be sent when events
+            // come in from broadcast receiver
+            PluginResult pluginResult = new PluginResult(PluginResult.Status.NO_RESULT);
+            pluginResult.setKeepCallback(true);
+            callbackContext.sendPluginResult(pluginResult);
             return true;
         }
 
@@ -184,8 +188,7 @@ public class BatteryNotification extends CordovaPlugin {
      * @return
      */
     private void updateBatteryInfo(Intent batteryIntent) {
-        JSONObject data = this.getBatteryInfo(batteryIntent);
-        sendUpdate(data, true);
+        sendUpdate(this.getBatteryInfo(batteryIntent), true);
     }
 
     /**
