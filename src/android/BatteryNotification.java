@@ -242,7 +242,7 @@ public class BatteryNotification extends CordovaPlugin {
         }
         Context context = webView.getContext().getApplicationContext();
 
-        NotificationService.getInstance(context).setNotificationSent(false);
+        // NotificationService.getInstance(context).setNotificationSent(false);
 
         Intent mIntent = new Intent(context, BatteryNotificationService.class);
         mIntent.putExtra("minLevel", minLevel);
@@ -256,10 +256,7 @@ public class BatteryNotification extends CordovaPlugin {
         Data data = new Data.Builder().putString("message", notifMessage).putInt("minLevel", minLevel).build();
         PeriodicWorkRequest periodicSyncDataWork = new PeriodicWorkRequest.Builder(NotificationWorker.class, 15,
                 TimeUnit.MINUTES).setInputData(data).setInitialDelay(15, TimeUnit.SECONDS).build();
-        mWorkManager.enqueueUniquePeriodicWork("check_battery", ExistingPeriodicWorkPolicy.KEEP, // Existing Periodic
-                                                                                                 // Work policy
-                periodicSyncDataWork // work request
-        );
+        mWorkManager.enqueueUniquePeriodicWork("check_battery", ExistingPeriodicWorkPolicy.KEEP, periodicSyncDataWork);
         // Log.e(LOG_TAG, "startService: enqueueUniquePeriodicWork done");
     }
 
