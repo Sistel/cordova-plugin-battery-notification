@@ -16,7 +16,7 @@ import android.util.Log;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
-import es.wicharge.app.MainActivity;
+import es.wicharge.mobileapp.MainActivity;
 
 import org.json.JSONObject;
 
