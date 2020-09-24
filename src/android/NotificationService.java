@@ -19,8 +19,8 @@ import androidx.core.app.NotificationCompat;
 import org.json.JSONObject;
 
 public class NotificationService {
-    public static final String SHARED_PREFERENCES = "es.wicharge.preferences";
-    public static final String NOTIFICATION_SENT_VALUE = "es.wicharge.notification.sent";
+    private String SHARED_PREFERENCES = "org.batterynotification.preferences";
+    private String NOTIFICATION_SENT_VALUE = "org.batterynotification.notification.sent";
 
     private static final String LOG_TAG = "BatteryNotifService";
     private static NotificationService instance = null;
@@ -34,6 +34,8 @@ public class NotificationService {
             synchronized(NotificationService.class) {
                 instance = new NotificationService();
                 context = aContext;
+                SHARED_PREFERENCES = getPackageName() + ".preferences";
+                NOTIFICATION_SENT_VALUE = getPackageName() + ".notification.sent";
                 sharedPref = context.getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE);
             }
         }
@@ -178,6 +180,10 @@ public class NotificationService {
 
     private boolean isNotificationSent() {
         return sharedPref.getBoolean(NOTIFICATION_SENT_VALUE, false);
+    }
+
+    private String getPackageName() {
+        this.context.getApplicationContext().getPackageName();
     }
 
     private Class getMainActivityClass() {
