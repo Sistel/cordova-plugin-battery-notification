@@ -181,7 +181,7 @@ public class NotificationService {
     }
 
     private Class getMainActivityClass() {
-        Class mainActivity;
+        Class mainActivity = null;
         Context context = this.context.getApplicationContext();
         String  packageName = context.getPackageName();
         Intent  launchIntent = context.getPackageManager().getLaunchIntentForPackage(packageName);
