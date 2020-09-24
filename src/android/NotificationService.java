@@ -182,7 +182,7 @@ public class NotificationService {
         return sharedPref.getBoolean(NOTIFICATION_SENT_VALUE, false);
     }
 
-    private String getPackageName() {
+    private static String getPackageName() {
         this.context.getApplicationContext().getPackageName();
     }
 
