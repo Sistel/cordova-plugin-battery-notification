@@ -19,8 +19,8 @@ import androidx.core.app.NotificationCompat;
 import org.json.JSONObject;
 
 public class NotificationService {
-    private String SHARED_PREFERENCES = "org.batterynotification.preferences";
-    private String NOTIFICATION_SENT_VALUE = "org.batterynotification.notification.sent";
+    private static String SHARED_PREFERENCES = "org.batterynotification.preferences";
+    private static String NOTIFICATION_SENT_VALUE = "org.batterynotification.notification.sent";
 
     private static final String LOG_TAG = "BatteryNotifService";
     private static NotificationService instance = null;
