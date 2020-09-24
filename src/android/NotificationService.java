@@ -34,8 +34,8 @@ public class NotificationService {
             synchronized(NotificationService.class) {
                 instance = new NotificationService();
                 context = aContext;
-                SHARED_PREFERENCES = getPackageName() + ".preferences";
-                NOTIFICATION_SENT_VALUE = getPackageName() + ".notification.sent";
+                SHARED_PREFERENCES = context.getApplicationContext().getPackageName() + ".preferences";
+                NOTIFICATION_SENT_VALUE = context.getApplicationContext().getPackageName() + ".notification.sent";
                 sharedPref = context.getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE);
             }
         }
@@ -180,10 +180,6 @@ public class NotificationService {
 
     private boolean isNotificationSent() {
         return sharedPref.getBoolean(NOTIFICATION_SENT_VALUE, false);
-    }
-
-    private static String getPackageName() {
-        this.context.getApplicationContext().getPackageName();
     }
 
     private Class getMainActivityClass() {
