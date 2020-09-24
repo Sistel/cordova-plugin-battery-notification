@@ -16,8 +16,6 @@ import android.util.Log;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
-import es.wicharge.mobileapp.MainActivity;
-
 import org.json.JSONObject;
 
 public class NotificationService {
@@ -76,7 +74,8 @@ public class NotificationService {
                             .setContentTitle("Wicharge")
                             .setContentText(notifMessage);
                     // Set the intent to fire when the user taps on notification.
-                    Intent resultIntent = new Intent(context, MainActivity.class);
+
+                    Intent resultIntent = new Intent(context, getMainActivityClass());
                     PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, resultIntent, 0);
                     mBuilder.setContentIntent(pendingIntent);
                     // Sets an ID for the notification
@@ -179,6 +178,22 @@ public class NotificationService {
 
     private boolean isNotificationSent() {
         return sharedPref.getBoolean(NOTIFICATION_SENT_VALUE, false);
+    }
+
+    private Class getMainActivityClass() {
+        Class mainActivity;
+        Context context = this.context.getApplicationContext();
+        String  packageName = context.getPackageName();
+        Intent  launchIntent = context.getPackageManager().getLaunchIntentForPackage(packageName);
+        String  className = launchIntent.getComponent().getClassName();
+
+        try {
+            //loading the Main Activity to not import it in the plugin
+            mainActivity = Class.forName(className);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return mainActivity;        
     }
 
 }
