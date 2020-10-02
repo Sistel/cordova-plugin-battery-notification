@@ -104,9 +104,9 @@
 - (void)getDataBatteryInfo:(CDVInvokedUrlCommand*)command
 {
     NSDictionary* data = [self getBatteryStatus];
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVComman$
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:data];
 
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.call$
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 
