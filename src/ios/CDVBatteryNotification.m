@@ -100,6 +100,16 @@
     return batteryData;
 }
 
+
+- (void)getDataBatteryInfo:(CDVInvokedUrlCommand*)command
+{
+    NSDictionary* data = [self getBatteryStatus];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:data];
+
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+
 /* turn on battery monitoring*/
 - (void)start:(CDVInvokedUrlCommand*)command
 {
