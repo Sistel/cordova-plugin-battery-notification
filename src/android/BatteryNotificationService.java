@@ -38,6 +38,7 @@ public class BatteryNotificationService extends Service {
     private BroadcastReceiver receiver = null;
     private int minLevel = -1;
     private String notifMessage = "Wicharge";
+    private SharedPreferences sharedPref = null;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -57,7 +58,7 @@ public class BatteryNotificationService extends Service {
 //        Log.d(LOG_TAG, "onStartCommand");
         if (intent != null && intent.getExtras() != null) {            
             minLevel = intent.getIntExtra("minLevel", 20);
-            notifMessage = intent.getStringExtra("message", "Batería baja, use wicharge para localizar el punto de carga más cercano");
+            notifMessage = intent.getStringExtra("message");
 
             setMinLevel(minLevel);
             setNotifMessage(notifMessage);

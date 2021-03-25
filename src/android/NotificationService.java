@@ -43,7 +43,7 @@ public class NotificationService {
         return instance;
     }
 
-    private void sendNotification(String notifMessage) {
+    private void executeNotification(int mNotificationId, String notifMessage) {
         setNotificationSent(true);
         NotificationManager manager = (NotificationManager) context
                 .getSystemService(Context.NOTIFICATION_SERVICE);
@@ -88,10 +88,10 @@ public class NotificationService {
             Notification notification = getActiveNotification(mNotificationId);
             if (!isPlugged && level <= minLevel) {
                 if (!isNotificationSent() && notification == null) {
-                    sendNotification(notifMessage);
+                    executeNotification(mNotificationId,notifMessage);
                 } else {
                     if (level > getLastBatteryLevel() && notification == null) {
-                        sendNotification(notifMessage);
+                        executeNotification(mNotificationId, notifMessage);
                     }
                 }
                 setLastBatteryLevel(level);
