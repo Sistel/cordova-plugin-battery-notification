@@ -21,6 +21,7 @@ import org.json.JSONObject;
 public class NotificationService {
     private static String SHARED_PREFERENCES = "org.batterynotification.preferences";
     private static String NOTIFICATION_SENT_VALUE = "org.batterynotification.notification.sent";
+    private static String NOTIFICATION_LASTLEVEL_VALUE = "org.batterynotification.lastlevel";
 
     private static final String LOG_TAG = "BatteryNotifService";
     private static NotificationService instance = null;
@@ -42,6 +43,34 @@ public class NotificationService {
         return instance;
     }
 
+    private void sendNotification(String notifMessage) {
+        setNotificationSent(true);
+        NotificationManager manager = (NotificationManager) context
+                .getSystemService(Context.NOTIFICATION_SERVICE);
+        String channelId = "task_batt_channel";
+        String channelName = "task_batt_name";
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(channelId, channelName,
+                    NotificationManager.IMPORTANCE_DEFAULT);
+            manager.createNotificationChannel(channel);
+        }
+
+
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context, channelId)
+                .setSmallIcon(getIcon("ic_launcher"))
+                .setContentTitle("Wicharge")
+                .setContentText(notifMessage);
+        // Set the intent to fire when the user taps on notification.
+
+        Intent resultIntent = new Intent(context, getMainActivityClass());
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, resultIntent, 0);
+        mBuilder.setContentIntent(pendingIntent);
+        // Sets an ID for the notification
+
+        // It will display the notification in notification bar
+        manager.notify(mNotificationId, mBuilder.build());        
+    }
+
     public void sendNotification(int minLevel, String notifMessage) {
         JSONObject data = getDataBatteryInfo();
         if (data != null) {
@@ -59,42 +88,22 @@ public class NotificationService {
             Notification notification = getActiveNotification(mNotificationId);
             if (!isPlugged && level <= minLevel) {
                 if (!isNotificationSent() && notification == null) {
-                    setNotificationSent(true);
-                    NotificationManager manager = (NotificationManager) context
-                            .getSystemService(Context.NOTIFICATION_SERVICE);
-                    String channelId = "task_batt_channel";
-                    String channelName = "task_batt_name";
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        NotificationChannel channel = new NotificationChannel(channelId, channelName,
-                                NotificationManager.IMPORTANCE_DEFAULT);
-                        manager.createNotificationChannel(channel);
+                    sendNotification(notifMessage);
+                } else {
+                    if (level > getLastBatteryLevel() && notification == null) {
+                        sendNotification(notifMessage);
                     }
-
-
-                    NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context, channelId)
-                            .setSmallIcon(getIcon("ic_launcher"))
-                            .setContentTitle("Wicharge")
-                            .setContentText(notifMessage);
-                    // Set the intent to fire when the user taps on notification.
-
-                    Intent resultIntent = new Intent(context, getMainActivityClass());
-                    PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, resultIntent, 0);
-                    mBuilder.setContentIntent(pendingIntent);
-                    // Sets an ID for the notification
-
-                    // It will display the notification in notification bar
-                    manager.notify(mNotificationId, mBuilder.build());
                 }
+                setLastBatteryLevel(level);
 
             } else {
-                if (level > minLevel && notification != null) {
+                if (notification != null) {
                     NotificationManager manager = (NotificationManager) context
                             .getSystemService(Context.NOTIFICATION_SERVICE);
                     manager.cancel(mNotificationId);
                 }
-                if (level > minLevel && isNotificationSent()) {
-                    setNotificationSent(false);
-                }
+                setNotificationSent(false);
+                setLastBatteryLevel(level);
             }
         }
     }
@@ -176,6 +185,17 @@ public class NotificationService {
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putBoolean(NOTIFICATION_SENT_VALUE, value);
         editor.apply();
+    }
+
+    private void setLastBatteryLevel(int level) {
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putInt(NOTIFICATION_LASTLEVEL_VALUE, level);
+        editor.apply();
+
+    }
+
+    private int getLastBatteryLevel() {
+        return sharedPref.getInt(NOTIFICATION_LASTLEVEL_VALUE, 20);
     }
 
     private boolean isNotificationSent() {

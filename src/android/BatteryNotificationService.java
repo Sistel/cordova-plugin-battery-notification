@@ -25,10 +25,15 @@ import android.os.IBinder;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 
 import android.util.Log;
 
 public class BatteryNotificationService extends Service {
+    private static String SHARED_PREFERENCES = "org.batterynotification.preferences";
+    private static String NOTIFICATION_MINLEVEL_VALUE = "org.batterynotification.minlevel";
+    private static String NOTIFICATION_NOTIFMESSAGE_VALUE = "org.batterynotification.notifmessage";
+    
     private static final String LOG_TAG = "BatteryNotification";
     private BroadcastReceiver receiver = null;
     private int minLevel = -1;
@@ -50,11 +55,17 @@ public class BatteryNotificationService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 //        Log.d(LOG_TAG, "onStartCommand");
-        if (intent != null && intent.getExtras() != null) {
-            minLevel = intent.getIntExtra("minLevel", 22);
-            notifMessage = intent.getStringExtra("message");
+        if (intent != null && intent.getExtras() != null) {            
+            minLevel = intent.getIntExtra("minLevel", 20);
+            notifMessage = intent.getStringExtra("message", "Batería baja, use wicharge para localizar el punto de carga más cercano");
+
+            setMinLevel(minLevel);
+            setNotifMessage(notifMessage);
 
             Log.d(LOG_TAG, "onStartCommand getIntExtra minLevel: " + minLevel);
+        } else {
+            minLevel = getMinLevel();
+            notifMessage = getNotifMessage();
         }
 
         return START_STICKY;
@@ -76,18 +87,48 @@ public class BatteryNotificationService extends Service {
 
     private void registerBatteryListener() {
         if (this.receiver == null) {
+
             this.receiver = new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
 //                Log.d(LOG_TAG, "received battery event");
-                    if (minLevel != -1) {
-                        NotificationService.getInstance(getApplicationContext()).sendNotification(minLevel, notifMessage);
-                    }
+                    if (minLevel == -1) {
+                        minLevel = getMinLevel();
+                        notifMessage = getNotifMessage();
+                    }    
+                    NotificationService.getInstance(getApplicationContext()).sendNotification(minLevel, notifMessage);
+                    
                 }
             };
             getApplicationContext().registerReceiver(this.receiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
         }
     }
 
+    private SharedPreferences getSharedPref() {
+        if (sharedPref == null) {
+            sharedPref = getApplicationContext().getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE);
+        }
+        return sharedPref;
+    }
+
+    private void setMinLevel(int level) {
+        SharedPreferences.Editor editor = getSharedPref().edit();
+        editor.putInt(NOTIFICATION_MINLEVEL_VALUE, level);
+        editor.apply();
+    }
+
+    private void setNotifMessage(String message) {
+        SharedPreferences.Editor editor = getSharedPref().edit();
+        editor.putString(NOTIFICATION_NOTIFMESSAGE_VALUE, message);
+        editor.apply();
+    }
+
+    private int getMinLevel() {
+        return sharedPref.getInt(NOTIFICATION_MINLEVEL_VALUE, 20);
+    }
+
+    private String getNotifMessage() {
+        return sharedPref.getString(NOTIFICATION_NOTIFMESSAGE_VALUE, "Batería baja, use wicharge para localizar el punto de carga más cercano");
+    }
 
 }
