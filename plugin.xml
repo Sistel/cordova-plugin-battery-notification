@@ -37,6 +37,7 @@
         <source-file src="src/android/BatteryNotificationService.java" target-dir="src/org/apache/cordova/batterynotification" />
         <source-file src="src/android/NotificationWorker.java" target-dir="src/org/apache/cordova/batterynotification" />
         <source-file src="src/android/NotificationService.java" target-dir="src/org/apache/cordova/batterynotification" />
+        <source-file src="src/android/BatteryNotifRestarterBroadcastReceiver.java" target-dir="src/org/apache/cordova/batterynotification" />
 
         <!-- <framework src="src/android/workmanager.gradle" custom="true" type="gradleReference"/> -->
         <framework src="androidx.work:work-runtime:2.4.0" />
