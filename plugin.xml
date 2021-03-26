@@ -25,6 +25,12 @@
         </config-file>
         <config-file target="AndroidManifest.xml" parent="/manifest/application">
             <service android:name="org.apache.cordova.batterynotification.BatteryNotificationService" />
+            <receiver
+                android:name="org.apache.cordova.batterynotification.BatteryNotifRestarterBroadcastReceiver"
+                android:enabled="true"
+                android:exported="true"
+                android:label="RestartServiceWhenStopped">
+            </receiver>
         </config-file>
 
         <source-file src="src/android/BatteryNotification.java" target-dir="src/org/apache/cordova/batterynotification" />

@@ -55,6 +55,7 @@ public class BatteryNotificationService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        super.onStartCommand(intent, flags, startId);
 //        Log.d(LOG_TAG, "onStartCommand");
         if (intent != null && intent.getExtras() != null) {            
             minLevel = intent.getIntExtra("minLevel", 20);
@@ -84,6 +85,26 @@ public class BatteryNotificationService extends Service {
                 Log.e(LOG_TAG, "Error unregistering battery receiver: " + e.getMessage(), e);
             }
         }
+        Intent broadcastIntent = new Intent(this, BatteryNotifRestarterBroadcastReceiver.class);       
+        sendBroadcast(broadcastIntent);
+    }
+
+    @Override
+    public void onTaskRemoved(Intent rootIntent){
+        Intent restartServiceIntent = new Intent(getApplicationContext(), this.getClass());
+        restartServiceIntent.setPackage(getPackageName());
+
+        PendingIntent restartServicePendingIntent = PendingIntent.getService(getApplicationContext(), 1, restartServiceIntent, PendingIntent.FLAG_ONE_SHOT);
+        AlarmManager alarmService = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+        alarmService.set(
+            AlarmManager.ELAPSED_REALTIME,
+            SystemClock.elapsedRealtime() + 5000,
+            restartServicePendingIntent);
+
+        Intent broadcastIntent = new Intent(this, BatteryNotifRestarterBroadcastReceiver.class);       
+        sendBroadcast(broadcastIntent);
+
+        super.onTaskRemoved(rootIntent);
     }
 
     private void registerBatteryListener() {
